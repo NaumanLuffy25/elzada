@@ -1,0 +1,196 @@
+/* ============================================================================
+   Elzada Admission OS — Admin design system (token layer)
+   ----------------------------------------------------------------------------
+   Everything in this file is scoped to `.adm-shell`, which is applied once by
+   `app/admin/layout.tsx`. The public website is therefore never affected.
+
+   The console is deliberately theme-isolated: it always renders the deep
+   navy/charcoal foundation below, regardless of the public light/dark toggle.
+   That matches the design brief (restrained blue accents, muted slate
+   secondary text, thin subtle borders, minimal shadows, purposeful motion)
+   and keeps the not-yet-migrated admin modules legible while they are
+   progressively moved onto these tokens.
+
+   Consumed as Tailwind utilities: `bg-adm-surface`, `text-adm-muted`,
+   `border-adm-line`, `rounded-adm`, `p-adm-4`, `duration-adm` …
+   (registered in `tailwind.config.ts` → theme.extend).
+
+   Imported by: app/admin/layout.tsx
+   ========================================================================== */
+
+.adm-shell {
+  /* --- Force the dark semantic palette for the whole console ---------------
+     The public site drives these HSL variables from `:root` / `.dark`.
+     Re-declaring them here means every semantic utility inside the console
+     (`bg-card`, `text-foreground`, `border-border`, `text-muted-foreground`,
+     `text-primary` …) resolves to the admin palette no matter which public
+     theme the visitor selected. This is what keeps the legacy admin modules
+     coherent without touching them. */
+  --background: 228 55% 9%;
+  --foreground: 210 40% 98%;
+
+  --card: 228 45% 11%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 228 45% 12%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 217 91% 60%;
+  --primary-foreground: 228 55% 9%;
+
+  --secondary: 226 33% 18%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 226 30% 16%;
+  --muted-foreground: 218 15% 65%;
+
+  --accent: 42 74% 55%;
+  --accent-foreground: 228 55% 9%;
+
+  --destructive: 0 63% 50%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 226 30% 22%;
+  --input: 226 30% 20%;
+  --ring: 217 91% 60%;
+
+  /* --- Colour tokens ------------------------------------------------------
+     Stored as space-separated sRGB channels so Tailwind can compose alpha,
+     e.g. `bg-adm-accent/10`, `border-adm-danger/40`, `text-adm-muted/80`. */
+  --adm-ch-bg: 11 18 32; /*          #0b1220  deep navy foundation          */
+  --adm-ch-bg-soft: 13 21 38; /*     #0d1526  sidebar / sunken rows         */
+  --adm-ch-surface: 16 26 43; /*     #101a2b  panels                        */
+  --adm-ch-surface-2: 21 31 51; /*   #151f33  raised / hover fills           */
+  --adm-ch-surface-3: 27 38 61; /*   #1b263d  active fills                   */
+  --adm-ch-fg: 232 237 246; /*       #e8edf6  primary text                */
+  --adm-ch-muted: 147 161 184; /*    #93a1b8  secondary (muted slate)       */
+  --adm-ch-subtle: 100 116 139; /*   #64748b  tertiary / meta                */
+  --adm-ch-accent: 59 130 246; /*    #3b82f6  restrained blue               */
+  --adm-ch-accent-hover: 96 165 250; /* #60a5fa                            */
+  --adm-ch-ok: 52 211 153; /*        #34d399                            */
+  --adm-ch-warn: 251 191 36; /*      #fbbf24                            */
+  --adm-ch-danger: 248 113 113; /*   #f87171                            */
+  --adm-ch-info: 56 189 248; /*      #38bdf8                            */
+
+  /* Borders are pre-composited so a plain `border-adm-line` already reads as
+     a thin, subtle hairline. */
+  --adm-line: rgba(148, 163, 184, 0.14);
+  --adm-line-strong: rgba(148, 163, 184, 0.28);
+
+  /* --- Radius tokens ----------------------------------------------------- */
+  --adm-radius-xs: 4px;
+  --adm-radius-sm: 6px;
+  --adm-radius: 10px;
+  --adm-radius-lg: 14px;
+
+  /* --- Spacing tokens (4px base) ----------------------------------------- */
+  --adm-space-1: 0.25rem;
+  --adm-space-2: 0.5rem;
+  --adm-space-3: 0.75rem;
+  --adm-space-4: 1rem;
+  --adm-space-5: 1.25rem;
+  --adm-space-6: 1.5rem;
+  --adm-space-8: 2rem;
+
+  /* --- Elevation tokens (deliberately minimal) ---------------------------- */
+  --adm-shadow-xs: 0 1px 2px rgb(2 6 23 / 0.45);
+  --adm-shadow-sm: 0 1px 3px rgb(2 6 23 / 0.55);
+  --adm-shadow: 0 12px 32px -20px rgb(2 6 23 / 0.95);
+
+  /* --- Typography tokens -------------------------------------------------
+     Scale:   eyebrow 11px · caption 12px · body 13px · title 22px
+     Weights: 400 body · 500 labels · 600 headings                            */
+  --adm-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --adm-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* --- Layout tokens ----------------------------------------------------- */
+  --adm-sidebar-w: 264px;
+  --adm-sidebar-w-collapsed: 72px;
+  --adm-topbar-h: 56px;
+}
+
+/* Collapsed sidebar: one attribute flip drives sidebar width AND the content
+   offset, so both animate together with a single transition. */
+.adm-shell[data-collapsed="true"] {
+  --adm-sidebar-w: var(--adm-sidebar-w-collapsed);
+}
+
+/* ---------------------------------------------------------------------------
+   Page background
+   The public site paints an ambient radial gradient on `body::before` and a
+   themed `body` background. Inside the console those are replaced by the flat
+   navy foundation. `:has()` is a progressive enhancement — the opaque shell
+   already covers the viewport, this just avoids a flash at the edges.
+   --------------------------------------------------------------------------- */
+body:has(.adm-shell) {
+  background-color: #0b1220;
+}
+
+body:has(.adm-shell)::before {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Focus
+   One consistent, always-visible focus ring across the console. Declared
+   unlayered so it wins over the public `@layer base` focus rule and over any
+   utility ring, and it never mutates the element's border-radius.
+   --------------------------------------------------------------------------- */
+.adm-shell *:focus-visible {
+  outline: 2px solid rgb(var(--adm-ch-accent) / 0.65);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Dense data regions get slim scrollbars.
+   --------------------------------------------------------------------------- */
+.adm-shell ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.adm-shell ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.adm-shell ::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.22);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+.adm-shell ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(148 163 184 / 0.4);
+}
+
+/* ---------------------------------------------------------------------------
+   Honour reduced-motion: all console motion becomes effectively instant.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .adm-shell,
+  .adm-shell *,
+  .adm-shell *::before,
+  .adm-shell *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Print: drop chrome, keep the data.
+   --------------------------------------------------------------------------- */
+@media print {
+  .adm-shell [data-admin-chrome] {
+    display: none !important;
+  }
+
+  .adm-shell {
+    --adm-sidebar-w: 0px;
+  }
+}
